@@ -2,11 +2,13 @@
 #include <locale.h>
 
 int main (){
+    
     int var, num1, num2;
     float res;
     long long fatorial = 1;
     int i = 1;
     setlocale(LC_ALL, "Portuguese");
+
  printf("--------------Calculadora Online--------------");
  printf("\n1.Adição");
 printf("\n2.Subtração");
