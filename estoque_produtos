@@ -1,0 +1,142 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_NOME 50
+#define MAX_PRODUTOS 20
+
+
+typedef struct {
+    int codigo;
+    char nome[MAX_NOME];
+    float preco_unitario;
+    int estoque_atual;
+    float valor_total_estoque; 
+} Produto;
+
+
+void calcularValorTotalEstoque(Produto *p) {
+    if (p != NULL) {
+        p->valor_total_estoque = p->preco_unitario * p->estoque_atual;
+    }
+}
+
+
+void mostrarProduto(const Produto *p) {
+    printf("%-8d | %-20s | %-10.2f | %-8d | R$ %-10.2f\n", 
+           p->codigo, p->nome, p->preco_unitario, p->estoque_atual, p->valor_total_estoque);
+}
+
+
+void cadastrarProduto(Produto *p) {
+    printf("Codigo...........: ");
+    scanf("%d", &p->codigo);
+    getchar(); 
+
+    printf("Nome.............: ");
+    fgets(p->nome, MAX_NOME, stdin);
+    p->nome[strcspn(p->nome, "\n")] = 0; 
+
+    printf("Preco unitario...: ");
+    scanf("%f", &p->preco_unitario);
+
+    printf("Quantidade inicial em estoque: ");
+    scanf("%d", &p->estoque_atual);
+
+    calcularValorTotalEstoque(p);
+    printf("Produto cadastrado com sucesso!\n");
+    printf("Valor total em estoque: R$ %.2f\n", p->valor_total_estoque);
+}
+
+int buscarProdutoPorCodigo(const Produto produtos[], int quantidade, const char *codigoBusca) {
+    int cod = atoi(codigoBusca); 
+    for (int i = 0; i < quantidade; i++) {
+        if (produtos[i].codigo == cod) {
+            return i; 
+        }
+    }
+    return -1; 
+}
+
+
+void listarTodosProdutos(const Produto produtos[], int quantidade) {
+    if (quantidade == 0) {
+        printf("\nNenhum produto cadastrado.\n");
+        return;
+    }
+    printf("\n%-8s | %-20s | %-10s | %-8s | %-12s\n", "CODIGO", "NOME", "PRECO", "ESTOQUE", "VALOR TOTAL");
+    printf("--------------------------------------------------------------------------\n");
+    for (int i = 0; i < quantidade; i++) {
+        mostrarProduto(&produtos[i]);
+    }
+}
+
+
+
+int main() {
+    Produto lista[MAX_PRODUTOS];
+    int qtd_atual = 0;
+    int opcao = -1;
+
+    while (opcao != 0) {
+        printf("\nSISTEMA DE CONTROLE DE PRODUTOS\n");
+        printf("1. Cadastrar novo produto\n");
+        printf("2. Listar todos os produtos\n");
+        printf("3. Buscar produto por codigo\n");
+        printf("4. Atualizar estoque de um produto\n");
+        printf("0. Sair\n");
+        printf("Digite sua opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                if (qtd_atual < MAX_PRODUTOS) {
+                    cadastrarProduto(&lista[qtd_atual]);
+                    qtd_atual++;
+                } else {
+                    printf("Erro: Limite de estoque atingido!\n");
+                }
+                break;
+            case 2:
+                listarTodosProdutos(lista, qtd_atual);
+                break;
+            case 3: {
+                char busca[10];
+                printf("Digite o codigo para busca: ");
+                scanf("%s", busca);
+                int idx = buscarProdutoPorCodigo(lista, qtd_atual, busca);
+                if (idx != -1) {
+                    printf("\nProduto Encontrado:\n");
+                    mostrarProduto(&lista[idx]);
+                } else {
+                    printf("Produto nao encontrado.\n");
+                }
+                break;
+            }
+            case 4: {
+                char busca[10];
+                int ajuste;
+                printf("Digite o codigo do produto: ");
+                scanf("%s", busca);
+                int idx = buscarProdutoPorCodigo(lista, qtd_atual, busca);
+                if (idx != -1) {
+                    printf("Estoque atual: %d. Digite a quantidade para somar (ou subtrair): ", lista[idx].estoque_atual);
+                    scanf("%d", &ajuste);
+                    lista[idx].estoque_atual += ajuste;
+                    calcularValorTotalEstoque(&lista[idx]);
+                    printf("Estoque atualizado com sucesso!\n");
+                } else {
+                    printf("Produto nao encontrado.\n");
+                }
+                break;
+            }
+            case 0:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opção invalida!\n");
+        }
+    }
+
+    return 0;
+}
